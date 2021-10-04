@@ -16,7 +16,7 @@ app.use('/v1', route);
 route.post('/mail',async (req,res)=>{
     const {to,subject,message,cc,bcc} = req.body
     try{
-        let result = await main(to,subject,message,cc,bcc).catch(console.error)
+        let result = await main(to,subject,message,cc,bcc).catch((error)=>{return {error}})
         res.status(200).json(result)
     }catch{
         res.status(400).json({'message':'error'})
@@ -34,21 +34,21 @@ async function main(to,subject,message,cc,bcc){
           text: message,// text plain
           html:`${message}`, // Html
         };
-    
+        let testAccount = await nodemailer.createTestAccount();
     const transporter = nodemailer.createTransport({
-        port: 587,               // true for 465, false for other ports
         host: process.env.HOST_MAIL,
+        port: 587,               // true for 465, false for other ports
         secure: false,
         auth: {
                 user: process.env.USER_MAIL,
                 pass: process.env.PASS_MAIL,
              },
-             tls: {
+        tls: {
                 rejectUnauthorized: false
-            }
+        }
         });
     let info = await transporter.sendMail(mailData)
-return({"message":"ok"})
+return({"message":"success ","info":info})
 
 }
 
